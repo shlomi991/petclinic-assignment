@@ -2,9 +2,12 @@ pipeline {
     agent any
     
     environment {
-        // Replace '<YOUR-SERVER-NAME>' with your actual JFrog Trial server name (e.g., 'shlomi')
+        // The JFrog server ID
         JFROG_SERVER = 'trialjdz9wr' 
         JF_URL = "https://${JFROG_SERVER}.jfrog.io"
+        
+        // --- NEW: Tell JFrog CLI to scope all build info to our specific project ---
+        JF_PROJECT = 'petclinic'
         
         DOCKER_REGISTRY = "${JFROG_SERVER}.jfrog.io"
         MAVEN_REPO = 'petclinic-maven'
@@ -18,6 +21,7 @@ pipeline {
         stage('Compile & Test') {
             steps {
                 withCredentials([string(credentialsId: 'jfrog-access-token', variable: 'JF_ACCESS_TOKEN')]) {
+                    
                     // 1. Remove existing config (if any) to prevent "already exists" errors on subsequent runs
                     sh "jf config remove ${JFROG_SERVER} --quiet || true"
                     
