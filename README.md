@@ -79,7 +79,7 @@ docker login trialjdz9wr.jfrog.io -u jfrog-reviewer -p Jfrog-reviewer99
 Port `8081` is used on the host to avoid conflicts with local services (e.g. Jenkins on `8080`):
 
 ```bash
-docker run -d -p 8081:8080 trialjdz9wr.jfrog.io/petclinic-docker/spring-petclinic:8
+docker run -d -p 8081:8080 trialjdz9wr.jfrog.io/petclinic-docker/spring-petclinic:12
 ```
 
 **Step 3 — Open the application**

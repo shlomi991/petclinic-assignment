@@ -5,7 +5,7 @@ image:
   # Base repository URL
   repository: trialjdz9wr.jfrog.io/petclinic-docker/spring-petclinic
   # The specific tag/build number to deploy
-  tag: "8"
+  tag: "12"
   pullPolicy: IfNotPresent
 
 service:
