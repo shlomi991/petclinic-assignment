@@ -18,13 +18,16 @@ pipeline {
         stage('Compile & Test') {
             steps {
 // withCredentials securely injects the token into the JF_ACCESS_TOKEN environment variable
-                withCredentials([string(credentialsId: 'jfrog-access-token', variable: 'JF_ACCESS_TOKEN')]) 
-                {
+                // withCredentials securely injects the token into the JF_ACCESS_TOKEN environment variable
+                withCredentials([string(credentialsId: 'jfrog-access-token', variable: 'JF_ACCESS_TOKEN')]) {
                     
-                    // 1. Configure Maven to resolve and deploy using our specific repositories
-                    sh "jf mvnc --repo-resolve-releases=${MAVEN_REPO} --repo-resolve-snapshots=${MAVEN_REPO} --repo-deploy-releases=petclinic-maven-local --repo-deploy-snapshots=petclinic-maven-local"
+                    // 1. Configure the JFrog CLI explicitly with our server details
+                    sh "jf config add ${JFROG_SERVER} --url=${JF_URL} --access-token=\$JF_ACCESS_TOKEN --interactive=false"
                     
-                    // 2. Compile the code and run tests using JFrog CLI
+                    // 2. Configure Maven to resolve and deploy using our specific server and repositories
+                    sh "jf mvnc --server-id-resolve=${JFROG_SERVER} --server-id-deploy=${JFROG_SERVER} --repo-resolve-releases=${MAVEN_REPO} --repo-resolve-snapshots=${MAVEN_REPO} --repo-deploy-releases=petclinic-maven-local --repo-deploy-snapshots=petclinic-maven-local"
+                    
+                    // 3. Compile the code and run tests using JFrog CLI
                     sh "jf mvn clean install -U --build-name=${BUILD_NAME} --build-number=${BUILD_NUMBER}"
                 }
             }
