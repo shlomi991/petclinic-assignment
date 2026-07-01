@@ -1,5 +1,5 @@
-# Use a lightweight JRE base image for runtime
-FROM eclipse-temurin:17-jre-alpine
+# Force linux/amd64 platform to prevent Apple Silicon (ARM) manifest mismatch issues
+FROM --platform=linux/amd64 eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
