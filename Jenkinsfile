@@ -2,11 +2,11 @@ pipeline {
     agent any
     
     environment {
-        // Replace with your actual JFrog Trial server name
-        JFROG_SERVER = 'trialjdz9wrs' 
-        DOCKER_REGISTRY = "${JFROG_SERVER}.jfrog.io"
+        // Replace '<YOUR-SERVER-NAME>' with your actual JFrog Trial server name (e.g., 'shlomi')
+        JFROG_SERVER = 'trialjdz9wr' 
+        JF_URL = "https://${JFROG_SERVER}.jfrog.io"
         
-        // Using the Virtual Repositories you just created
+        DOCKER_REGISTRY = "${JFROG_SERVER}.jfrog.io"
         MAVEN_REPO = 'petclinic-maven'
         DOCKER_REPO = 'petclinic-docker'
         
@@ -17,10 +17,7 @@ pipeline {
     stages {
         stage('Compile & Test') {
             steps {
-// withCredentials securely injects the token into the JF_ACCESS_TOKEN environment variable
-                // withCredentials securely injects the token into the JF_ACCESS_TOKEN environment variable
                 withCredentials([string(credentialsId: 'jfrog-access-token', variable: 'JF_ACCESS_TOKEN')]) {
-                    
                     // 1. Configure the JFrog CLI explicitly with our server details
                     sh "jf config add ${JFROG_SERVER} --url=${JF_URL} --access-token=\$JF_ACCESS_TOKEN --interactive=false"
                     
@@ -39,25 +36,23 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
+        stage('Docker Push & Traceability') {
             steps {
-                // Push the image to Artifactory and link it to the build info
-                sh "jf docker push ${IMAGE_NAME} --build-name=${BUILD_NAME} --build-number=${BUILD_NUMBER}"
-            }
-        }
-
-        stage('Publish Build Info') {
-            steps {
-                // Collect environment variables and publish build info for traceability
-                sh "jf rt bce ${BUILD_NAME} ${BUILD_NUMBER}"
-                sh "jf rt bp ${BUILD_NAME} ${BUILD_NUMBER}"
+                withCredentials([string(credentialsId: 'jfrog-access-token', variable: 'JF_ACCESS_TOKEN')]) {
+                    // Push the image and record the build info
+                    sh "jf docker push ${IMAGE_NAME} --build-name=${BUILD_NAME} --build-number=${BUILD_NUMBER}"
+                    sh "jf rt bce ${BUILD_NAME} ${BUILD_NUMBER}"
+                    sh "jf rt bp ${BUILD_NAME} ${BUILD_NUMBER}"
+                }
             }
         }
 
         stage('Xray Scan & Quality Gate') {
             steps {
-                // Trigger an Xray scan on the published build and fail if severe vulnerabilities are found
-                sh "jf bs ${BUILD_NAME} ${BUILD_NUMBER} --fail=true"
+                withCredentials([string(credentialsId: 'jfrog-access-token', variable: 'JF_ACCESS_TOKEN')]) {
+                    // Scan the build for severe vulnerabilities
+                    sh "jf bs ${BUILD_NAME} ${BUILD_NUMBER} --fail=true"
+                }
             }
         }
     }
