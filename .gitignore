@@ -46,3 +46,15 @@ out/
 _site/
 *.css
 !petclinic.css
+
+# Build context and logs
+*.log
+
+# Environment variables and secrets
+.env
+*.pem
+*.key
+secret*
+
+# JFrog CLI local configuration (in case you run 'jf' locally)
+.jfrog/

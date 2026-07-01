@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+    
+    environment {
+        // Replace with your actual JFrog Trial server name
+        JFROG_SERVER = 'trialjdz9wrs' 
+        DOCKER_REGISTRY = "${JFROG_SERVER}.jfrog.io"
+        
+        // Using the Virtual Repositories you just created
+        MAVEN_REPO = 'petclinic-maven'
+        DOCKER_REPO = 'petclinic-docker'
+        
+        IMAGE_NAME = "${DOCKER_REGISTRY}/${DOCKER_REPO}/spring-petclinic:${env.BUILD_NUMBER}"
+        BUILD_NAME = 'petclinic-pipeline'
+    }
+
+    stages {
+        stage('Compile & Test') {
+            steps {
+                // Compile the code and run tests using JFrog CLI to resolve dependencies via Artifactory
+                sh "jf mvn clean install -U --build-name=${BUILD_NAME} --build-number=${BUILD_NUMBER}"
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME} ."
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                // Push the image to Artifactory and link it to the build info
+                sh "jf docker push ${IMAGE_NAME} --build-name=${BUILD_NAME} --build-number=${BUILD_NUMBER}"
+            }
+        }
+
+        stage('Publish Build Info') {
+            steps {
+                // Collect environment variables and publish build info for traceability
+                sh "jf rt bce ${BUILD_NAME} ${BUILD_NUMBER}"
+                sh "jf rt bp ${BUILD_NAME} ${BUILD_NUMBER}"
+            }
+        }
+
+        stage('Xray Scan & Quality Gate') {
+            steps {
+                // Trigger an Xray scan on the published build and fail if severe vulnerabilities are found
+                sh "jf bs ${BUILD_NAME} ${BUILD_NUMBER} --fail=true"
+            }
+        }
+    }
+}
