@@ -19,6 +19,7 @@ This project was built with a Solutions Engineering mindset, focusing on securit
 | **DevSecOps** | JFrog Xray SCA + Contextual Analysis scan, with a policy-driven Quality Gate stage |
 | **Container Security** | Lightweight `eclipse-temurin:17-jre-alpine` image, `linux/amd64`, non-root `spring` user |
 | **Infrastructure as Code** | Helm chart with environment-specific `values.yaml` |
+| **Deployment Hardening** | Resource requests/limits, dropped capabilities, and Actuator health checks — a `startupProbe` gates liveness/readiness for the slow JVM boot |
 
 ---
 
