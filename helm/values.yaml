@@ -1,0 +1,13 @@
+# Global environment variables
+replicaCount: 1
+
+image:
+  # Base repository URL
+  repository: trialjdz9wr.jfrog.io/petclinic-docker/spring-petclinic
+  # The specific tag/build number to deploy
+  tag: "8"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8080
