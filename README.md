@@ -15,10 +15,10 @@ This project was built with a Solutions Engineering mindset, focusing on securit
 | Area | Implementation |
 |------|----------------|
 | **Repository Management** | 3-tier Artifactory structure (Local, Remote, Virtual) for Maven and Docker |
-| **Traceability** | JFrog Build Info links Docker images to Maven builds and Git commits |
-| **DevSecOps** | Automated Xray scans with Quality Gates on every pipeline run |
+| **Traceability** | JFrog Build Info links the Docker image to its Maven build and Git commit |
+| **DevSecOps** | JFrog Xray SCA + Contextual Analysis scan, with a policy-driven Quality Gate stage |
 | **Container Security** | Lightweight `eclipse-temurin:17-jre-alpine` image, `linux/amd64`, non-root `spring` user |
-| **Infrastructure as Code** | Helm Chart with environment-specific `values.yaml` |
+| **Infrastructure as Code** | Helm chart with environment-specific `values.yaml` |
 
 ---
 
@@ -26,10 +26,30 @@ This project was built with a Solutions Engineering mindset, focusing on securit
 
 The [`Jenkinsfile`](Jenkinsfile) defines the following stages:
 
-1. **Compile & Test** — Resolves Maven dependencies via Artifactory Virtual Repositories and compiles the code.
+1. **Compile & Test** — Resolves Maven dependencies via Artifactory Virtual Repositories, then compiles and runs the tests (`jf mvn clean install`).
 2. **Docker Build** — Packages the compiled `.jar` into a secure Docker image.
 3. **Docker Push & Traceability** — Pushes the image to Artifactory and publishes Build Info to the JFrog Project.
-4. **Xray Scan & Quality Gate** — Triggers an automated Xray scan and enforces security policies.
+4. **Xray Scan & Quality Gate** — Scans the published build with Xray. When an Xray Watch/Policy is configured, the stage fails the pipeline on a policy violation (`jf bs --fail=true`).
+
+---
+
+## Security Scanning (JFrog Xray)
+
+Every build is scanned by JFrog Xray for known vulnerabilities (SCA) and enriched with **Contextual Analysis** to determine whether each CVE is actually exploitable in the image.
+
+A JFrog **Watch + Security Policy** (`petclinic-watch` / `petclinic-security-policy`) enforces the Quality Gate: the `jf bs --fail=true` stage **fails the pipeline** on any High or Critical violation. This was verified end-to-end — an early build was blocked on Critical Tomcat CVEs before remediation.
+
+### Detect → Remediate → Pass
+
+| CVE | Severity | Source | Remediation |
+|-----|----------|--------|-------------|
+| CVE-2026-55276 | Critical | `tomcat-embed-core` 11.0.22 | Upgraded to **11.0.23** via `tomcat.version` in `pom.xml` |
+| CVE-2026-53434 | Critical | `tomcat-embed-core` 11.0.22 | Upgraded to **11.0.23** |
+| CVE-2026-53404 | High | `tomcat-embed-core` 11.0.22 | Upgraded to **11.0.23** |
+| CVE-2026-2100 | High | Alpine `p11-kit` | `apk upgrade` in `Dockerfile` (fixed in `0.26.2-r0`) |
+| CVE-2026-11824 / 11822 | High | Alpine `sqlite-libs` | Not applicable per Contextual Analysis; no upstream fix yet |
+
+The full machine-readable results (Security, Violations, License and Operational-risk exports) are provided as a separate **Xray JSON export** deliverable alongside this repository.
 
 ---
 
@@ -86,7 +106,7 @@ helm install petclinic ./helm
 
 ```bash
 kubectl get pods
-kubectl get svc petclinic
+kubectl get svc petclinic-spring-petclinic-svc
 ```
 
 > Image tag and repository can be customized in [`helm/values.yaml`](helm/values.yaml).

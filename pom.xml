@@ -19,6 +19,9 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- Security: override Spring Boot managed Tomcat to fix CVE-2026-55276, CVE-2026-53434, CVE-2026-53404 -->
+    <tomcat.version>11.0.23</tomcat.version>
     <!-- Important for reproducible builds. Update using e.g. ./mvnw versions:set -DnewVersion=... -->
     <project.build.outputTimestamp>2024-11-28T14:37:52Z</project.build.outputTimestamp>
 
