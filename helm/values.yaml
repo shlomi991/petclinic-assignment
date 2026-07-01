@@ -11,3 +11,30 @@ image:
 service:
   type: LoadBalancer
   port: 8080
+
+# Resource requests/limits (best practice: prevent noisy-neighbour and OOM)
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+# Health checks via Spring Boot Actuator
+probes:
+  path: /actuator/health
+  liveness:
+    initialDelaySeconds: 60
+    periodSeconds: 15
+  readiness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+# Container hardening (complements the non-root user baked into the image)
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
