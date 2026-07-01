@@ -21,12 +21,16 @@ This project was built with a Solutions Engineering mindset, focusing on securit
 
 ---
 
-## How to Run the Application
+## How to Run the Application (Runnable Docker Image)
 
-The Docker image is hosted on a JFrog Artifactory environment. 
-*(Note: To facilitate easy testing for reviewers, the Docker registry has been configured to allow anonymous pull access. No login is required).*
+As per the assignment requirements, the application is fully containerized. The image is hosted on a secure JFrog Artifactory registry.
 
-### Option 1: Run via Docker (Local Testing)
+**1. Authenticate with the Registry:**
+To pull the image, please authenticate using this dedicated Read-Only reviewer account:
+```bash
+docker login trialjdz9wr.jfrog.io -u jfrog-reviewer -p Jfrog-reviewer99
+
+### Run via Docker (Local Testing)
 To run the containerized application locally, use the following command. The application port is mapped to `8081` to prevent conflicts with standard services (like local Jenkins/Tomcat on 8080):
 
 ```bash
