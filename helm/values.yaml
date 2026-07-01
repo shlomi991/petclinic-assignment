@@ -24,11 +24,13 @@ resources:
 # Health checks via Spring Boot Actuator
 probes:
   path: /actuator/health
+  # startupProbe gates liveness/readiness so a slow JVM start is not killed
+  startup:
+    failureThreshold: 30
+    periodSeconds: 10
   liveness:
-    initialDelaySeconds: 60
     periodSeconds: 15
   readiness:
-    initialDelaySeconds: 30
     periodSeconds: 10
 
 # Container hardening (complements the non-root user baked into the image)
