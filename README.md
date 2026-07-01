@@ -49,7 +49,17 @@ A JFrog **Watch + Security Policy** (`petclinic-watch` / `petclinic-security-pol
 | CVE-2026-2100 | High | Alpine `p11-kit` | `apk upgrade` in `Dockerfile` (fixed in `0.26.2-r0`) |
 | CVE-2026-11824 / 11822 | High | Alpine `sqlite-libs` | Not applicable per Contextual Analysis; no upstream fix yet |
 
-The full machine-readable results (Security, Violations, License and Operational-risk exports) are provided as a separate **Xray JSON export** deliverable alongside this repository.
+### Xray Export Deliverables (build 12)
+
+The machine-readable scan results are attached as JSON exports. Key files:
+
+| File | What it shows |
+|------|---------------|
+| `Security_Export` | Remaining vulnerabilities after remediation — 3 total (2 High, 1 Medium), **0 contextually applicable** |
+| `Violations_Export` (with ignores) | The 2 `sqlite-libs` CVEs, marked `is_ignored: true` / `is_blocking: false` with the risk-acceptance note |
+| `SBOM (SPDX)` | Full bill of materials — confirms Tomcat `11.0.23` and `p11-kit 0.26.2-r0` |
+
+Together they document the flow: **detect → remediate → consciously accept the non-applicable, unfixable findings**.
 
 ---
 
