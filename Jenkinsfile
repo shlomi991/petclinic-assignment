@@ -17,8 +17,16 @@ pipeline {
     stages {
         stage('Compile & Test') {
             steps {
-                // Compile the code and run tests using JFrog CLI to resolve dependencies via Artifactory
-                sh "jf mvn clean install -U --build-name=${BUILD_NAME} --build-number=${BUILD_NUMBER}"
+// withCredentials securely injects the token into the JF_ACCESS_TOKEN environment variable
+                withCredentials([string(credentialsId: 'jfrog-access-token', variable: 'JF_ACCESS_TOKEN')]) 
+                {
+                    
+                    // 1. Configure Maven to resolve and deploy using our specific repositories
+                    sh "jf mvnc --repo-resolve-releases=${MAVEN_REPO} --repo-resolve-snapshots=${MAVEN_REPO} --repo-deploy-releases=petclinic-maven-local --repo-deploy-snapshots=petclinic-maven-local"
+                    
+                    // 2. Compile the code and run tests using JFrog CLI
+                    sh "jf mvn clean install -U --build-name=${BUILD_NAME} --build-number=${BUILD_NUMBER}"
+                }
             }
         }
 
