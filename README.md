@@ -52,6 +52,8 @@ Use the dedicated read-only reviewer account:
 docker login trialjdz9wr.jfrog.io -u jfrog-reviewer -p Jfrog-reviewer99
 ```
 
+> **Note:** Credentials are included here only to simplify reviewer access — not a recommended security practice. In production, use Jenkins Credentials or a secrets manager instead.
+
 **Step 2 — Pull and run the container**
 
 Port `8081` is used on the host to avoid conflicts with local services (e.g. Jenkins on `8080`):
